@@ -1,58 +1,94 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
-   
-}
-
-@* <div class="text-center">
-    <h1 class="display-4" style="color:red">Welcome</h1>
-
-</div> *@
+﻿@model BookDisplayModel
 
 <div class="my-2">
-   <form class="row row-cols-lg-auto g-3 align-items-center">
+   <form asp-action="Index" class="row row-cols-lg-auto g-3 align-items-center">
  
 
   <div class="col-12">
-    <label class="visually-hidden" for="inlineFormSelectPref">Genres</label>
-    <select class="form-select" id="genreId">
-      <option selected>Choose...</option>
-      <option value="1">Action</option>
-      <option value="2">Horror</option>
-      <option value="3">Romance</option>
-      <option value="3">Science Fiction</option>
-
+    <label class="visually-hidden" for="genreid">Genres</label>
+            <select class="form-select" id="genreId" name="genreId">
+                <option selected>Genre</option>
+                @foreach(var genre in Model.Genres)
+                {
+                    <option  selected="@(genre.Id==Model.GenreId)" value="@genre.Id">@genre.GenreName</option>
+                }
     </select>
   </div>
 
         <div class="col-12">
-            <label class="visually-hidden" for="inlineFormInputGroupUsername">Search by title</label>
+            <label class="visually-hidden" for="sTerm">Search by title</label>
             <div class="input-group">
                 <div class="input-group-text"></div>
-                <input type="text" class="form-control" id="" placeholder="Search by title">
+                <input type="text" class="form-control" id="sTerm" value="@Model.STerm" name="sTerm" placeholder="Search by title">
             </div>
         </div>
 
 
   <div class="col-12">
     <button type="submit" class="btn btn-primary">Search</button>
+     <a href="/Home/Index" type="reset" class="btn btn-dark">Reset</a>
   </div>
 </form>
 </di>
 
 <div class="w-100 mt-4 d-flex flex-wrap">
-    @for(int i=1;i<=9;i++)
+    @foreach(var item in Model.Books)
     {
-    <div class="card mx-2 mb-4" style="width: 16rem;">
-                <img src="https://picsum.photos/150/150" class="card-img-top" alt="...">
-     <div class="card-body">
-        <h5 class="card-title">Book Title</h5>
-        <p class="card-text">
-        Genre:
-        Author:
-        Price:
-                </p>
-        <a href="#" class="btn btn-primary">Add to Cart</a>
-    </div>
+            <div class="card mx-2 mb-4 shadow-sm" style="width:14rem;">
+                <!-- Book Image -->
+                @if (string.IsNullOrEmpty(item.Image))
+                {
+                    <img style="width:100%; height:180; object-fit: cover;" src="https://picsum.photos/150/150" class="card-img-top" alt="Book Cover">
+                }
+                else
+                {
+                    <img style="width:100%; height:180; object-fit: cover;" src="/Images/@item.Image" class="card-img-top" alt="Book Cover">
+                }
+
+                <!-- Card Body -->
+                <div class="card-body d-flex flex-column justify-content-between">
+                    <!-- Book Title -->
+                    <h5 class="card-title text-center mb-3">@item.BookName</h5>
+
+                    <!-- Details Section -->
+                    <ul class="list-unstyled mb-3">
+                        <li class="mb-2">
+                            <strong>Genre:</strong> @item.GenreName
+                        </li>
+                        <li class="mb-2">
+                            <strong>Author:</strong> @item.AuthorName
+                        </li>
+                        <li class="mb-2">
+                            <strong>Price:</strong> ₹@item.Price
+                        </li>
+                    </ul>
+
+                    <!-- Add to Cart Button -->
+                    <div class="text-center">
+                        <button type="button" onclick="add(@item.Id)" class="btn btn-primary w-100">Add to Cart</button>
+                    </div>
+                </div>
+            </div>
+        }
 </div>
+
+@section Scripts{
+    <script>
+       async function add(bookId)
+        {
+                try {
+                    var response = await fetch(`/Cart/AddItem?bookId=${bookId}`);
+                    if (response.status == 200) {
+                        var result = await response.json();
+                        console.log(result);
+                         var cartCountEl = document.getElementById("cartCount");
+                         cartCountEl.innerHTML = result;
+                        // window.location.href = "#cartCount";
+                    }
+                }
+                catch (err) {
+                    console.log(err);
+                }
+            }
+        </script>
     }
-</div>

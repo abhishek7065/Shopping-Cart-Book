@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Shopping_Cart_Book.Models;
+using Shopping_Cart_Book.Models.DTOs;
 using System.Diagnostics;
 
 namespace Shopping_Cart_Book.Controllers
@@ -7,15 +8,28 @@ namespace Shopping_Cart_Book.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly IHomerepository _homeRepository;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, IHomerepository homeRepository)
         {
             _logger = logger;
+            _homeRepository = homeRepository;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index(string sTerm = "", int genreId = 0)
         {
-            return View();
+            var books = await _homeRepository.GetBooks(sTerm, genreId);
+            var genres = await _homeRepository.Genres();
+
+            var model = new BookDisplayModel
+            {
+                Books = books,
+                Genres = genres,
+                GenreId = genreId, 
+                STerm = sTerm
+            };
+
+            return View(model);
         }
 
         public IActionResult Privacy()

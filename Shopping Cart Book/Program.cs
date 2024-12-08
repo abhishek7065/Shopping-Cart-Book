@@ -14,6 +14,10 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => options.Sign
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultUI().AddDefaultTokenProviders();
 builder.Services.AddControllersWithViews();
+//register Homerepository Service 
+builder.Services.AddTransient<IHomerepository,HomeRepository>();
+builder.Services.AddTransient<ICartRepository, Cartrepository>();
+
 
 
 var app = builder.Build();
