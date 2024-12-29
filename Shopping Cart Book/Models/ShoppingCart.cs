@@ -7,8 +7,6 @@ namespace Shopping_Cart_Book.Models
     public class ShoppingCart
     {
         public int Id { get; set; }
-        [Required]
-        public int CartId { get; set; }
         [Required]  
         public string UserId {  get; set; }
         public bool IsDeleted { get; set; } = false;

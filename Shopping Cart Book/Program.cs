@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Shopping_Cart_Book.Data;
+using Shopping_Cart_Book.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,13 +11,26 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
+builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = false)
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultUI().AddDefaultTokenProviders();
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(30); // Optional: Set cookie expiration
+    options.SlidingExpiration = false;
+    options.Cookie.Expiration = null; // Make the cookie session-based
+    options.LoginPath = "/Account/Login";
+});
+
 builder.Services.AddControllersWithViews();
 //register Homerepository Service 
 builder.Services.AddTransient<IHomerepository,HomeRepository>();
-builder.Services.AddTransient<ICartRepository, Cartrepository>();
+builder.Services.AddScoped<ICartRepository, Cartrepository>();
+builder.Services.AddTransient<IUserOrderRepository, UserOrderRepository>();
+
 
 
 
@@ -42,6 +56,15 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+app.Use(async (context, next) =>
+{
+    if (!context.User.Identity.IsAuthenticated)
+    {
+        context.Response.Cookies.Delete(".AspNetCore.Identity.Application");
+    }
+    await next();
+});
 
 app.UseAuthorization();
 

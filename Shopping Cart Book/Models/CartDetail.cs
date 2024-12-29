@@ -8,12 +8,15 @@ namespace Shopping_Cart_Book.Models
     {
         public int Id { get; set; }
         [Required]
-        public int ShoppingCart_Id {  get; set; } 
+        public int ShoppingCartId {  get; set; } 
         public int BookId {  get; set; }
         [Required]
-        public int Quantity {  get; set; }  
-        public Book Book { get; set; }
-        public ShoppingCart ShoppingCart { get; set; }  
+        public int Quantity {  get; set; }
+        [Required]  
+        public double UnitPrice { get; set; }
+        public ShoppingCart ShoppingCart { get; set; } // Navigation to ShoppingCart
+        public Book Book { get; set; } // Navigation to Book
 
     }
+
 }

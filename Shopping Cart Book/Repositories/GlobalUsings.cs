@@ -2,4 +2,5 @@
 global using Shopping_Cart_Book.Models;
 global using Shopping_Cart_Book.Repositories;
 global using Shopping_Cart_Book.Models.DTOs;
+global using Shopping_Cart_Book.Constants;
 

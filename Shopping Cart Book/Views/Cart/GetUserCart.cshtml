@@ -1,0 +1,192 @@
+﻿@model ShoppingCart
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Cart</title>
+    <!-- Add Bootstrap CSS and other stylesheets if necessary -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        /* General background and container styling */
+       /*  .container {
+            background-color: #f8f9fa;
+        } */
+
+        .page-container {
+            padding: 20px; /* Add padding to the container */
+            background-color: #fff; /* White background for the inner content */
+            border-radius: 10px; /* Optional: Rounded corners for a polished look */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Optional: Shadow for depth */
+        }
+
+        /* Card styling */
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+        }
+
+        .card-img-top {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .card-body {
+            padding: 15px;
+        }
+
+        /* Product name and price */
+        .card-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .card-text {
+            font-size: 14px;
+            color: #555;
+        }
+
+        /* Quantity and buttons */
+        .d-flex {
+            align-items: center;
+        }
+
+        .form-control {
+            width: 60px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .btn-outline-secondary {
+            font-size: 16px;
+        }
+
+        /* Empty Cart Message */
+        .empty-cart {
+            text-align: center;
+            padding: 50px;
+        }
+
+            .empty-cart i {
+                font-size: 100px;
+                color: #ff6f61;
+            }
+
+            .empty-cart h2 {
+                color: #ff6f61;
+            }
+
+            .empty-cart p {
+                font-size: 18px;
+                color: #888;
+            }
+
+        .btn-primary {
+            background-color: #ff6f61;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-container mt-4" >
+        @if (Model != null && Model.CartDetails != null && Model.CartDetails.Count > 0)
+        {
+            <h5>My Cart</h5>
+
+            <div class="row">
+                @foreach (var item in Model.CartDetails)
+                {
+                    <div class="col-12 col-md-4 mb-3">
+                        <div class="card">
+                            <!-- Product Image -->
+                            <img src="@((string.IsNullOrEmpty(item.Book.Image)) ? "https://picsum.photos/150/150" : "/images/" + item.Book.Image)"
+                                 class="card-img-top"
+                                 alt="Product Image">
+
+                            <div class="card-body">
+                                <!-- Product Name -->
+                                <h6 class="card-title">@item.Book.BookName</h6>
+
+                                <!-- Product Price -->
+                                <p class="card-text">₹@item.Book.Price</p>
+
+                                <!-- Quantity Selection -->
+                                <div class="d-flex align-items-center">
+                                    <!-- Minus Button -->
+                                    <a class="btn btn-sm btn-outline-secondary" href="/Cart/RemoveItem?bookId=@item.BookId">
+                                        <i class="bi bi-dash-circle"></i>
+                                    </a>
+
+                                    <!-- Quantity Input Box -->
+                                    <input type="number"
+                                           disabled="true"
+                                           id="quantity-@item.BookId"
+                                           value="@item.Quantity"
+                                           min="1"
+                                           class="form-control mx-2"
+                                           onchange="updateQuantity(@item.BookId, this.value)" />
+
+                                    <!-- Plus Button -->
+                                    <a class="btn btn-sm btn-outline-secondary" href="/Cart/AddItem?bookId=@item.BookId&&redirect=1">
+                                        <i class="bi bi-plus-circle"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="my-2">
+                <h5>Total(INR): </h5>
+                ₹@(Model.CartDetails.Select(item => item.Book.Price * item.Quantity).Sum())
+            </div>
+            <div class="my-2">
+                <a class="btn btn-primary" href="/Cart/Checkout">Checkout</a>
+            </div>
+        }
+        else
+        {
+            <!-- Empty Cart Message -->
+            <div class="empty-cart">
+                <i class="bi bi-cart-x"></i>
+                <h2>Your Cart is Empty</h2>
+                <p>Looks like you haven't added anything to your cart yet.</p>
+                <a href="/Home/Index" class="btn btn-primary btn-lg">Shop Now</a>
+            </div>
+        }
+    </div>
+
+    <!-- Add Bootstrap JS if needed -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
+
+
+
+<script>
+    // Function to handle quantity change
+    async function updateQuantity(bookId, newQuantity) {
+        try {
+            const response = await fetch(`/Cart/UpdateQuantity?bookId=${bookId}&quantity=${newQuantity}`);
+            if (response.ok) {
+                const result = await response.json();
+                console.log("Quantity updated:", result);
+                location.reload(); // Reload to reflect updated total and quantity
+            } else {
+                console.error("Failed to update quantity, Status:", response.status);
+            }
+        } catch (err) {
+            console.error("Error updating quantity:", err);
+        }
+    }
+</script>
+
+

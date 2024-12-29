@@ -1,94 +1,237 @@
 ﻿@model BookDisplayModel
 
-<div class="my-2">
-   <form asp-action="Index" class="row row-cols-lg-auto g-3 align-items-center">
- 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Display</title>
+    <!-- Add Bootstrap CSS and other styles -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
-  <div class="col-12">
-    <label class="visually-hidden" for="genreid">Genres</label>
-            <select class="form-select" id="genreId" name="genreId">
-                <option selected>Genre</option>
-                @foreach(var genre in Model.Genres)
-                {
-                    <option  selected="@(genre.Id==Model.GenreId)" value="@genre.Id">@genre.GenreName</option>
-                }
-    </select>
-  </div>
+    <style>
+       
 
-        <div class="col-12">
-            <label class="visually-hidden" for="sTerm">Search by title</label>
-            <div class="input-group">
-                <div class="input-group-text"></div>
-                <input type="text" class="form-control" id="sTerm" value="@Model.STerm" name="sTerm" placeholder="Search by title">
+        .page-container {
+            padding: 20px; /* Add padding to the container */
+            background-color: #fff; /* White background for the inner content */
+            border-radius: 10px; /* Optional: Rounded corners for a polished look */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Optional: Shadow for depth */
+        }
+    </style>
+</head>
+<body>
+    <div class="container page-container mt-4">
+        <!-- Search Form -->
+        <form method="get" class="row mb-4 d-flex align-items-center mt-4">
+            <div class="col-md-3">
+                <label class="visually-hidden" for="genreId">Genres</label>
+                <select class="form-select" id="genreId" name="genreId">
+                    <option selected>Genre</option>
+                    @foreach (var genre in Model.Genres)
+                    {
+                        <option selected="@(genre.Id == Model.GenreId)" value="@genre.Id">@genre.GenreName</option>
+                    }
+                </select>
             </div>
-        </div>
 
-
-  <div class="col-12">
-    <button type="submit" class="btn btn-primary">Search</button>
-     <a href="/Home/Index" type="reset" class="btn btn-dark">Reset</a>
-  </div>
-</form>
-</di>
-
-<div class="w-100 mt-4 d-flex flex-wrap">
-    @foreach(var item in Model.Books)
-    {
-            <div class="card mx-2 mb-4 shadow-sm" style="width:14rem;">
-                <!-- Book Image -->
-                @if (string.IsNullOrEmpty(item.Image))
-                {
-                    <img style="width:100%; height:180; object-fit: cover;" src="https://picsum.photos/150/150" class="card-img-top" alt="Book Cover">
-                }
-                else
-                {
-                    <img style="width:100%; height:180; object-fit: cover;" src="/Images/@item.Image" class="card-img-top" alt="Book Cover">
-                }
-
-                <!-- Card Body -->
-                <div class="card-body d-flex flex-column justify-content-between">
-                    <!-- Book Title -->
-                    <h5 class="card-title text-center mb-3">@item.BookName</h5>
-
-                    <!-- Details Section -->
-                    <ul class="list-unstyled mb-3">
-                        <li class="mb-2">
-                            <strong>Genre:</strong> @item.GenreName
-                        </li>
-                        <li class="mb-2">
-                            <strong>Author:</strong> @item.AuthorName
-                        </li>
-                        <li class="mb-2">
-                            <strong>Price:</strong> ₹@item.Price
-                        </li>
-                    </ul>
-
-                    <!-- Add to Cart Button -->
-                    <div class="text-center">
-                        <button type="button" onclick="add(@item.Id)" class="btn btn-primary w-100">Add to Cart</button>
-                    </div>
+            <div class="col-md-3">
+                <label class="visually-hidden" for="sTerm">Search by title</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="sTerm" value="@Model.STerm" name="sTerm" placeholder="Search by title">
                 </div>
             </div>
-        }
-</div>
 
-@section Scripts{
-    <script>
-       async function add(bookId)
-        {
-                try {
-                    var response = await fetch(`/Cart/AddItem?bookId=${bookId}`);
-                    if (response.status == 200) {
-                        var result = await response.json();
-                        console.log(result);
-                         var cartCountEl = document.getElementById("cartCount");
-                         cartCountEl.innerHTML = result;
-                        // window.location.href = "#cartCount";
+            <div class="col-md-5 d-flex justify-content-start align-items-center">
+                <!-- Search Button -->
+                <button type="submit" class="btn btn-gradient me-3 d-flex align-items-center">
+                    <i class="bi bi-search me-2"></i> Search
+                </button>
+
+                <!-- Reset Button -->
+                <a href="/Home/Index" class="btn btn-gradient-secondary d-flex align-items-center">
+                    <i class="bi bi-arrow-clockwise me-2"></i> Reset
+                </a>
+            </div>
+        </form>
+
+        <!-- Book List -->
+        <div class="w-100 mt-4 d-flex flex-wrap">
+            <style>
+                .cart-icon {
+                    display: inline-block;
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 50%;
+                    color: lightslategray;
+                    font-size: 40px;
+                    text-align: center;
+                    line-height: 56px;
+                    transition: all 0.3s ease;
+                }
+
+
+                /* Gradient Button Styles */
+                .btn-gradient {
+                    background: linear-gradient(90deg, #007bff, #00c6ff);
+                    color: #fff;
+                    border: none;
+                    padding: 10px 20px;
+                    font-size: 16px;
+                    font-weight: 500;
+                    border-radius: 25px;
+                    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+                    transition: all 0.3s ease;
+                    display: inline-flex;
+                    align-items: center;
+                }
+
+                .btn-gradient:hover {
+                    background: linear-gradient(90deg, #0056b3, #0099cc);
+                    color: #fff;
+                    box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.15);
+                    transform: translateY(-2px);
+                }
+
+                /* Secondary Gradient Button */
+                .btn-gradient-secondary {
+                    background: linear-gradient(90deg, #6c757d, #adb5bd);
+                    color: #fff;
+                    border: none;
+                    padding: 10px 20px;
+                    font-size: 16px;
+                    font-weight: 500;
+                    border-radius: 25px;
+                    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+                    transition: all 0.3s ease;
+                    display: inline-flex;
+                    align-items: center;
+                }
+
+                    .btn-gradient-secondary:hover {
+                        background: linear-gradient(90deg, #495057, #868e96);
+                        color: #fff;
+                        box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.15);
+                        transform: translateY(-2px);
                     }
+
+                /* Input Group Styles */
+                .input-group input {
+                    border-radius: 25px;
+                    padding: 10px 15px;
+                    border: 1px solid #ddd;
+                    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
                 }
-                catch (err) {
-                    console.log(err);
-                }
+
+                    .input-group input:focus {
+                        border-color: #007bff;
+                        box-shadow: 0px 0px 8px rgba(0, 123, 255, 0.5);
+                    }
+         
+
+            </style>
+
+            @foreach (var item in Model.Books)
+            {
+                <div class="card mx-2 mb-4 shadow-sm" style="width:14rem;">
+                    <!-- Book Image -->
+                    @if (string.IsNullOrEmpty(item.Image))
+                    {
+                        <img style="width:100%; height:180px; object-fit: cover;" src="https://picsum.photos/150/150" class="card-img-top" alt="Book Cover">
+                    }
+                    else
+                    {
+                        <img style="width:100%; height:180px; object-fit: cover;" src="/Images/@item.Image" class="card-img-top" alt="Book Cover">
+                    }
+
+                    <!-- Card Body -->
+                    <div class="card-body d-flex flex-column justify-content-between">
+                        <!-- Book Title -->
+                        <h5 class="card-title text-center mb-3">@item.BookName</h5>
+
+                        <!-- Details Section -->
+                        <ul class="list-unstyled mb-3">
+                            <li class="mb-2">
+                                <strong>Genre:</strong> @item.GenreName
+                            </li>
+                            <li class="mb-2">
+                                <strong>Author:</strong> @item.AuthorName
+                            </li>
+                            <li class="mb-2">
+                                <strong>Price:</strong> ₹@item.Price
+                            </li>
+                        </ul>
+
+                        <!-- Add to Cart Button -->
+                        <div class="text-center">
+                            @if (User.Identity.IsAuthenticated)
+                            {
+                                <a href="javascript:void(0)" onclick="add(@item.Id)" class="cart-icon" title="Add to cart">
+                                    <i class="bi bi-cart-x"></i>
+                                </a>
+                            }
+                            else
+                            {
+                                <a href="/Identity/Account/Login" class="cart-icon" title="Login to add to cart">
+                                    <i class="bi bi-cart-x"></i>
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </div>
             }
-        </script>
-    }
+        </div>
+    </div>
+
+    <!-- Add Bootstrap JS if needed -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+
+@section Scripts {
+    <script>
+        // Function to Show Alert
+        function showCartAlert(message) {
+            const alertEl = document.createElement("div");
+            alertEl.innerText = message;
+            alertEl.style.position = "fixed";
+            alertEl.style.top = "20px";
+            alertEl.style.right = "20px";
+            alertEl.style.backgroundColor = "#007bff";
+            alertEl.style.color = "white";
+            alertEl.style.padding = "10px";
+            alertEl.style.borderRadius = "5px";
+            alertEl.style.zIndex = "1000";
+            document.body.appendChild(alertEl);
+
+            // Hide alert after 1 second
+            setTimeout(() => {
+                alertEl.remove();
+            }, 1000);
+        }
+
+        // Updated Add to Cart Function
+        async function add(bookId) {
+            try {
+                var response = await fetch(`/Cart/AddItem?bookId=${bookId}`);
+                if (response.status == 200) {
+                    var result = await response.json();
+                    console.log(result);
+
+                    // Update Cart Count in the UI
+                    var cartCountEl = document.getElementById("cartCount");
+                    cartCountEl.innerHTML = result;
+
+                    // Show success alert
+                    showCartAlert("Item added to the cart!");
+                } else {
+                    console.error("Failed to add item to cart, Status:", response.status);
+                }
+            } catch (err) {
+                console.log("Error:", err);
+            }
+        }
+    </script>
+}

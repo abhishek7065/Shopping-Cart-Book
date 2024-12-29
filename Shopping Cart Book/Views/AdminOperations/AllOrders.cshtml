@@ -1,0 +1,154 @@
+﻿@model IEnumerable<Order>
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "All Orders";
+}
+
+@if (Model != null && Model.Count() > 0)
+{
+    <!-- Orders Overview Section with Close Button -->
+    <div class="text-center mb-4 position-relative">
+        <h5 class="mb-0 text-primary" style="font-size: 30px;">Orders Overview</h5>
+        <!-- Cross Button to Close or Navigate -->
+        <a href="/" class="position-absolute top-0 end-0 p-2"  title="Close">
+            <i class="bi bi-x-circle" style="font-size: 24px; color: #dc3545;"></i>
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle text-center">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Order Date</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Mobile No</th>
+                            <th>Address</th>
+                            <th>Payment Status</th>
+                            <th>Order Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var order in Model)
+                        {
+                            <tr>
+                                <td>@order.CreateDate.ToString("dd-MM-yyyy")</td>
+                                <td>@order.Name</td>
+                                <td>@order.Email</td>
+                                <td>@order.MobileNumber</td>
+                                <td>@order.Address</td>
+                                <td>
+                                    <span class="badge bg-@(order.IsPaid ? "success" : "danger")">
+                                        @(order.IsPaid ? "Online" : "COD")
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info text-dark">
+                                        @order.OrderStatus.StatusName
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-2 justify-content-center">
+                                        <button type="button" data-bs-toggle="modal" data-bs-target="#modal-@order.Id"
+                                                class="btn btn-outline-primary btn-sm" title="Order Details">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                        <a asp-action="UpdateOrderStatus" asp-route-orderId="@order.Id"
+                                           class="btn btn-outline-info btn-sm" title="Update Order Status">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a asp-action="TogglePaymentStatus" asp-route-orderId="@order.Id"
+                                           class="btn btn-outline-warning btn-sm" title="Toggle Payment Status">
+                                            <i class="bi bi-currency-dollar"></i>
+                                        </a>
+                                    </div>
+
+                                    <!-- Modal partial for order details -->
+                                    @await Html.PartialAsync("/Views/AdminOperations/_OrderDetailModel.cshtml", new OrderDetailModelDto { DivId = order.Id.ToString(), OrderDetail = order.OrderDetail })
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-warning text-center mt-4">
+        <strong>No orders found!</strong>
+    </div>
+}
+
+<style>
+    /* Styling for the table and badges */
+    .table th, .table td {
+        vertical-align: middle;
+        font-size: 14px;
+    }
+
+    .badge {
+        font-size: 0.85rem;
+        padding: 0.4em 0.75em;
+    }
+
+    .btn-outline-primary, .btn-outline-info, .btn-outline-warning {
+        border-radius: 20px;
+        padding: 8px 15px;
+    }
+
+    /* Cards and Tables */
+    .card {
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .table-light {
+        background-color: #f8f9fa;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #e9ecef;
+    }
+
+    /* Table customizations */
+    .table-responsive {
+        max-height: 500px;
+        overflow-y: auto;
+    }
+
+    /* Modal button customizations */
+    .btn i {
+        margin-right: 5px;
+    }
+
+    /* Cross button customizations */
+    .position-relative {
+        position: relative;
+    }
+
+    .position-absolute {
+        position: absolute;
+    }
+
+    .top-0 {
+        top: 10px;
+    }
+
+    .end-0 {
+        right: 10px;
+    }
+
+    .p-2 {
+        padding: 0.5rem;
+    }
+
+    .text-danger {
+        color: #dc3545 !important;
+    }
+</style>
