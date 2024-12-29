@@ -269,8 +269,8 @@ namespace Shopping_Cart_Book.Data.Migrations
                     b.Property<int>("ShoppingCartId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ShoppingCart_Id")
-                        .HasColumnType("int");
+                    b.Property<double>("UnitPrice")
+                        .HasColumnType("float");
 
                     b.HasKey("Id");
 
@@ -307,11 +307,38 @@ namespace Shopping_Cart_Book.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<bool>("IsPaid")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("MobileNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
                     b.Property<int>("OrderStatusId")
                         .HasColumnType("int");
+
+                    b.Property<string>("PaymentMethod")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -321,6 +348,8 @@ namespace Shopping_Cart_Book.Data.Migrations
                         .HasColumnType("bit");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("OrderStatusId");
 
                     b.ToTable("Order");
                 });
@@ -338,6 +367,9 @@ namespace Shopping_Cart_Book.Data.Migrations
 
                     b.Property<int>("OrderId")
                         .HasColumnType("int");
+
+                    b.Property<double>("Quantity")
+                        .HasColumnType("float");
 
                     b.Property<double>("UnitPrice")
                         .HasColumnType("float");
@@ -379,9 +411,6 @@ namespace Shopping_Cart_Book.Data.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CartId")
-                        .HasColumnType("int");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -466,7 +495,7 @@ namespace Shopping_Cart_Book.Data.Migrations
                         .IsRequired();
 
                     b.HasOne("Shopping_Cart_Book.Models.ShoppingCart", "ShoppingCart")
-                        .WithMany()
+                        .WithMany("CartDetails")
                         .HasForeignKey("ShoppingCartId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -474,6 +503,17 @@ namespace Shopping_Cart_Book.Data.Migrations
                     b.Navigation("Book");
 
                     b.Navigation("ShoppingCart");
+                });
+
+            modelBuilder.Entity("Shopping_Cart_Book.Models.Order", b =>
+                {
+                    b.HasOne("Shopping_Cart_Book.Models.OrderStatus", "OrderStatus")
+                        .WithMany()
+                        .HasForeignKey("OrderStatusId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("OrderStatus");
                 });
 
             modelBuilder.Entity("Shopping_Cart_Book.Models.OrderDetail", b =>
@@ -510,6 +550,11 @@ namespace Shopping_Cart_Book.Data.Migrations
             modelBuilder.Entity("Shopping_Cart_Book.Models.Order", b =>
                 {
                     b.Navigation("OrderDetail");
+                });
+
+            modelBuilder.Entity("Shopping_Cart_Book.Models.ShoppingCart", b =>
+                {
+                    b.Navigation("CartDetails");
                 });
 #pragma warning restore 612, 618
         }

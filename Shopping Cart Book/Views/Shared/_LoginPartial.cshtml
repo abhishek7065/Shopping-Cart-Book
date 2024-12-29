@@ -1,21 +1,24 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @inject SignInManager<IdentityUser> SignInManager
 @inject UserManager<IdentityUser> UserManager
+@inject ICartRepository CartRepository
 
 <ul class="navbar-nav">
     @if (SignInManager.IsSignedIn(User))
     {
         <!-- Cart Icon for Logged-In Users -->
         <li class="nav-item">
-            <a class="nav-link" href="#">
-                <span id="cartCount" class="badge rounded-pill text-bg-info">(0)</span>
-                <i class="bi bi-cart"></i>
+            <a class="nav-link" href="/Cart/GetUserCart">
+                <span id="cartCount" class="badge rounded-pill text-bg-info" title="Go to cart">
+                    (0)
+                </span>
+                <i class="bi bi-cart" title="Go to cart"></i>
             </a>
         </li>
 
         <!-- User Info -->
         <li class="nav-item">
-            <a class="nav-link " asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">
+            <a class="nav-link" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">
                 Hello @User.Identity?.Name!
                 @if (User.IsInRole("Admin"))
                 {
@@ -44,3 +47,55 @@
         </li>
     }
 </ul>
+
+<!-- Cart Alert (Hidden by Default) -->
+<div id="cartAlert"
+     style="display: none; position: fixed; top: 20px; right: 20px; background-color: #007bff; color: white; padding: 10px; border-radius: 5px; z-index: 1000;">
+    Item added to the cart!
+</div>
+
+@section Scripts {
+    <script>
+        // Function to Show Cart Alert
+        function showCartAlert(message) {
+            const alertEl = document.getElementById("cartAlert");
+            alertEl.textContent = message;
+            alertEl.style.display = "block";
+            setTimeout(() => {
+                alertEl.style.display = "none"; // Hide alert after 1 second
+            }, 1000);
+        }
+
+        // Function to Update Cart Count
+        async function updateCartCount() {
+            try {
+                let response = await fetch('/Cart/GetCartItemCount');
+                if (response.ok) {
+                    const cartCount = await response.text();
+                    document.getElementById('cartCount').innerText = `(${cartCount})`;
+                }
+            } catch (err) {
+                console.error('Error updating cart count:', err);
+            }
+        }
+
+        // Function to Add Item to Cart
+        async function addToCart(bookId) {
+            try {
+                const response = await fetch(`/Cart/AddItem?bookId=${bookId}`);
+                if (response.ok) {
+                    const cartCount = await response.text();
+                    document.getElementById('cartCount').innerText = `(${cartCount})`;
+                    showCartAlert("Item added to the cart!"); // Show success message
+                } else {
+                    console.error("Failed to add item to cart, Status:", response.status);
+                }
+            } catch (err) {
+                console.error("Error adding item to cart:", err);
+            }
+        }
+
+        // Update cart count when the page loads
+        document.addEventListener("DOMContentLoaded", updateCartCount);
+    </script>
+}
